@@ -29,6 +29,26 @@ git --version
 
 ## 2) Install and Run
 
+### Option A: browser-based frontend
+
+Install dependencies and start the local server:
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 app.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5000
+```
+
+Fill out the form, submit it, and the page will:
+- generate the markdown brief under `output/`
+- optionally save a JSON handoff file under `output/crm/`
+- show the generated markdown in the browser
+
 ### Option A (Recommended): direct run with automatic dependency install
 
 The script automatically checks whether required libraries are installed and installs missing ones.
@@ -43,7 +63,7 @@ python3 prospecting_tool.py \
   --output "output/acme_discovery_brief.md"
 ```
 
-### Option B: explicit install first
+### Option B: direct CLI run with explicit install first
 
 ```bash
 python3 -m pip install -r requirements.txt

@@ -293,6 +293,30 @@ def create_markdown(inputs: ProspectInputs, website_data: dict, output_path: str
         f.write("\n".join(lines))
 
 
+def save_inputs_json(inputs: ProspectInputs, output_path: str) -> None:
+    json_output_dir = os.path.dirname(output_path)
+    if json_output_dir:
+        os.makedirs(json_output_dir, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(inputs.__dict__, f, indent=2)
+
+
+def generate_brief(inputs: ProspectInputs, output_path: str, save_inputs_path: str = "") -> str:
+    optional_deps_ready = ensure_dependencies()
+    website_data = fetch_website_summary(inputs.company_website, optional_deps_ready)
+
+    output_dir = os.path.dirname(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+
+    create_markdown(inputs, website_data, output_path)
+
+    if save_inputs_path:
+        save_inputs_json(inputs, save_inputs_path)
+
+    return os.path.abspath(output_path)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate a discovery-call prospecting brief in Markdown.")
     parser.add_argument("--company-name", required=True, help="Prospect company name")
@@ -307,8 +331,6 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    optional_deps_ready = ensure_dependencies()
-
     inputs = ProspectInputs(
         company_name=args.company_name,
         person_name=args.person_name,
@@ -316,22 +338,8 @@ def main() -> None:
         company_website=args.company_website,
         tech_stack=args.tech_stack,
     )
-
-    website_data = fetch_website_summary(inputs.company_website, optional_deps_ready)
-    output_dir = os.path.dirname(args.output)
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
-
-    create_markdown(inputs, website_data, args.output)
-
-    if args.save_inputs_json:
-        json_output_dir = os.path.dirname(args.save_inputs_json)
-        if json_output_dir:
-            os.makedirs(json_output_dir, exist_ok=True)
-        with open(args.save_inputs_json, "w", encoding="utf-8") as f:
-            json.dump(inputs.__dict__, f, indent=2)
-
-    print(f"[success] Brief created: {os.path.abspath(args.output)}")
+    output_path = generate_brief(inputs, args.output, args.save_inputs_json)
+    print(f"[success] Brief created: {output_path}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TiDB Prospecting Brief Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Local Prospecting Workspace</p>
+        <h1>Build a discovery-call brief from a form instead of a terminal command.</h1>
+        <p class="lede">
+          Enter the prospect details, generate the markdown brief, and open the saved files directly from this page.
+        </p>
+      </section>
+
+      <section class="workspace">
+        <form method="post" class="panel form-panel">
+          <div class="panel-head">
+            <h2>Prospect Inputs</h2>
+            <p>Required fields are marked and the files are written into <code>output/</code>.</p>
+          </div>
+
+          {% if error %}
+          <div class="alert">{{ error }}</div>
+          {% endif %}
+
+          <label>
+            <span>Company Name</span>
+            <input name="company_name" value="{{ form_data.company_name }}" placeholder="Acme Corp" required />
+          </label>
+
+          <label>
+            <span>Person Name</span>
+            <input name="person_name" value="{{ form_data.person_name }}" placeholder="Jane Doe" required />
+          </label>
+
+          <label>
+            <span>LinkedIn Profile</span>
+            <input
+              name="linkedin_profile"
+              type="url"
+              value="{{ form_data.linkedin_profile }}"
+              placeholder="https://www.linkedin.com/in/janedoe"
+              required
+            />
+          </label>
+
+          <label>
+            <span>Company Website</span>
+            <input
+              name="company_website"
+              type="url"
+              value="{{ form_data.company_website }}"
+              placeholder="https://example.com"
+              required
+            />
+          </label>
+
+          <label>
+            <span>Tech Stack</span>
+            <textarea
+              name="tech_stack"
+              rows="4"
+              placeholder="MySQL, Kubernetes, AWS, Kafka"
+            >{{ form_data.tech_stack }}</textarea>
+          </label>
+
+          <label class="checkbox">
+            <input name="save_inputs_json" type="checkbox" {% if form_data.save_inputs_json %}checked{% endif %} />
+            <span>Also save CRM handoff JSON</span>
+          </label>
+
+          <button type="submit">Generate Brief</button>
+        </form>
+
+        <section class="panel result-panel">
+          <div class="panel-head">
+            <h2>Generated Brief</h2>
+            <p>The generated markdown appears here after submission.</p>
+          </div>
+
+          {% if result %}
+          <div class="result-links">
+            <a href="{{ result.brief_url }}" target="_blank">{{ result.brief_name }}</a>
+            {% if result.json_url %}
+            <a href="{{ result.json_url }}" target="_blank">{{ result.json_name }}</a>
+            {% endif %}
+          </div>
+          <pre>{{ result.markdown }}</pre>
+          {% else %}
+          <div class="empty-state">
+            <p>No brief generated yet.</p>
+            <p>Submit the form to create a markdown brief and optional JSON export.</p>
+          </div>
+          {% endif %}
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
