@@ -18,6 +18,8 @@ import importlib
 import json
 import os
 import re
+import site
+import ssl
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -44,6 +46,7 @@ def ensure_dependencies() -> bool:
         "requests": "requests",
         "beautifulsoup4": "bs4",
     }
+    requirements_path = os.path.join(os.path.dirname(__file__), "requirements.txt")
 
     missing = []
     for package_name, module_name in package_to_import.items():
@@ -52,16 +55,47 @@ def ensure_dependencies() -> bool:
         except ImportError:
             missing.append(package_name)
 
+    needs_urllib3_downgrade = False
     if not missing:
+        try:
+            urllib3 = importlib.import_module("urllib3")
+            major_version = int(str(getattr(urllib3, "__version__", "0")).split(".", maxsplit=1)[0])
+            needs_urllib3_downgrade = "LibreSSL" in ssl.OPENSSL_VERSION and major_version >= 2
+        except (ImportError, ValueError):
+            needs_urllib3_downgrade = False
+
+    if not missing and not needs_urllib3_downgrade:
         return True
 
-    print(f"[info] Missing dependencies detected: {', '.join(missing)}")
-    print("[info] Installing dependencies with pip...")
+    if missing:
+        print(f"[info] Missing dependencies detected: {', '.join(missing)}")
+    if needs_urllib3_downgrade:
+        print("[info] Detected urllib3/OpenSSL compatibility issue. Installing pinned dependencies...")
+
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", *missing])
+        if os.path.exists(requirements_path):
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", requirements_path])
+        else:
+            print("[info] requirements.txt not found. Installing dependencies with pip...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", *missing])
+        importlib.invalidate_caches()
+
+        # pip may install into the user site-packages directory, which is not
+        # always on sys.path for the current process until a new interpreter starts.
+        user_site = site.getusersitepackages()
+        if user_site and user_site not in sys.path:
+            sys.path.append(user_site)
+
+        for package_name, module_name in package_to_import.items():
+            importlib.import_module(module_name)
+
         return True
     except subprocess.CalledProcessError:
         print("[warn] Could not install optional dependencies due to environment restrictions.")
+        print("[warn] Continuing with built-in parser fallback.")
+        return False
+    except ImportError as exc:
+        print(f"[warn] Dependencies installed but could not be imported in this session ({exc}).")
         print("[warn] Continuing with built-in parser fallback.")
         return False
 
