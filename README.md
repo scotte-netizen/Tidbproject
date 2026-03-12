@@ -74,6 +74,7 @@ mkdir -p output
 
 Optional:
 - `--save-inputs-json`: stores the provided inputs for CRM handoff/audit
+  - Nested output paths are supported and created automatically
 
 ---
 
@@ -83,6 +84,8 @@ The tool produces a Markdown file ready to share internally before the discovery
 
 Example output file: `output/acme_discovery_brief.md`
 
+Generated files under `output/` are ignored by git by default.
+
 ---
 
 ## 5) Push to GitHub (Step-by-Step)
@@ -91,9 +94,7 @@ After generating the brief and reviewing files:
 
 ```bash
 git status
-git add prospecting_tool.py requirements.txt README.md
-# Add generated output too if you want to track it:
-# git add output/acme_discovery_brief.md
+git add prospecting_tool.py requirements.txt README.md .gitignore
 
 git commit -m "Add non-technical TiDB prospecting brief generator"
 git push origin <your-branch-name>

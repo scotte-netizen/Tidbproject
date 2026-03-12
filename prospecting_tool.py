@@ -325,6 +325,9 @@ def main() -> None:
     create_markdown(inputs, website_data, args.output)
 
     if args.save_inputs_json:
+        json_output_dir = os.path.dirname(args.save_inputs_json)
+        if json_output_dir:
+            os.makedirs(json_output_dir, exist_ok=True)
         with open(args.save_inputs_json, "w", encoding="utf-8") as f:
             json.dump(inputs.__dict__, f, indent=2)
 
