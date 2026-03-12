@@ -49,6 +49,11 @@ Fill out the form, submit it, and the page will:
 - optionally save a JSON handoff file under `output/crm/`
 - show the generated markdown in the browser
 
+### Vercel deployment note
+
+This repo includes a Vercel-ready Python entrypoint in `index.py`, static assets in `public/`, and a `vercel.json`
+that bundles the Jinja templates. On Vercel, generated files are written to `/tmp/tidbproject-output`.
+
 ### Option A (Recommended): direct run with automatic dependency install
 
 The script automatically checks whether required libraries are installed and installs missing ones.

@@ -13,9 +13,10 @@ from prospecting_tool import ProspectInputs, generate_brief
 
 
 BASE_DIR = Path(__file__).resolve().parent
-OUTPUT_DIR = BASE_DIR / "output"
+IS_VERCEL = bool(os.environ.get("VERCEL"))
+OUTPUT_DIR = Path("/tmp/tidbproject-output") if IS_VERCEL else BASE_DIR / "output"
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 
 
 def slugify(value: str) -> str:
@@ -93,6 +94,11 @@ def index():
                 error = f"Could not generate brief: {exc}"
 
     return render_template("index.html", form_data=form_data, result=result, error=error)
+
+
+@app.route("/health")
+def health():
+    return {"ok": True, "runtime": "vercel" if IS_VERCEL else "local"}
 
 
 @app.route("/output/<path:filename>")
