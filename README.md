@@ -51,7 +51,7 @@ Fill out the form, submit it, and the page will:
 
 ### Vercel deployment note
 
-This repo includes a Vercel-ready Python entrypoint in `index.py`, static assets in `public/`, and a `vercel.json`
+This repo includes a Vercel-ready Python entrypoint in `api/index.py`, static assets in `public/`, and a `vercel.json`
 that bundles the Jinja templates. On Vercel, generated files are written to `/tmp/tidbproject-output`.
 
 ### Option A (Recommended): direct run with automatic dependency install
